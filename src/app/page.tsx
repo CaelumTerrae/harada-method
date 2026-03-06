@@ -1,65 +1,95 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { useHaradaStore } from "@/lib/store";
+import { ChartCard } from "@/components/chart-card";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const charts = useHaradaStore((s) => s.charts);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-background">
+      {/* Subtle decorative top bar */}
+      <div className="h-1 bg-gradient-to-r from-lime-200 via-green-200 via-yellow-200 to-amber-200" />
+
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-20">
+        {/* Hero */}
+        <header className="mb-12 sm:mb-20">
+          <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-4">
+            Goal-Setting Framework
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          <h1 className="font-serif text-4xl sm:text-6xl tracking-tight text-foreground leading-[1.1]">
+            Harada
+            <br />
+            <span className="text-muted-foreground/40">Method</span>
+          </h1>
+          <p className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
+            Turn one ambitious goal into 64 concrete, actionable behaviors.
+            Define 8 subgoals, break each into 8 daily practices, and see your
+            entire plan on a single chart.
+          </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mt-8 sm:mt-10">
+            <Link href="/create">
+              <Button size="lg" className="text-base px-10 h-12">
+                Start a New Chart
+              </Button>
+            </Link>
+            <Link
+              href="/about"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About the Method &rarr;
+            </Link>
+          </div>
+        </header>
+
+        {/* How it works */}
+        <section className="mb-12 sm:mb-20">
+          <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-8">
+            How it works
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              { step: "01", title: "Set your goal", desc: "One ambitious, central objective." },
+              { step: "02", title: "8 subgoals", desc: "Break it into 8 supporting areas." },
+              { step: "03", title: "64 behaviors", desc: "Define 8 actions per subgoal." },
+            ].map((item) => (
+              <div key={item.step}>
+                <p className="font-serif text-2xl text-foreground/20 mb-2">
+                  {item.step}
+                </p>
+                <p className="font-medium text-sm text-foreground mb-1">
+                  {item.title}
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Saved Charts */}
+        {hydrated && charts.length > 0 && (
+          <section>
+            <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
+              Your Charts
+            </h2>
+            <div className="flex flex-col gap-3">
+              {charts.map((chart) => (
+                <ChartCard key={chart.id} chart={chart} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
