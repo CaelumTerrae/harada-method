@@ -10,3 +10,14 @@ export type HaradaChart = {
   mainGoal: string;
   subgoals: Subgoal[];
 };
+
+export type SubgoalReview = {
+  rating: "low" | "medium" | "high";
+  feedback: string;
+};
+
+export type BehaviorReview = {
+  index: number;
+  fit: boolean;
+  feedback: string;
+};

@@ -2,17 +2,22 @@
 
 import { Progress } from "@/components/ui/progress";
 
+type Phase = "ai-feedback" | "goal" | "subgoals" | "subgoal-review" | "behaviors" | "behavior-review";
+
 type ProgressBarProps = {
   currentStep: number;
   totalSteps: number;
-  phase: "goal" | "subgoals" | "behaviors";
+  phase: Phase;
   subgoalIndex: number;
 };
 
-function getPhaseLabel(phase: ProgressBarProps["phase"], subgoalIndex: number): string {
+function getPhaseLabel(phase: Phase, subgoalIndex: number): string {
+  if (phase === "ai-feedback") return "Getting Started";
   if (phase === "goal") return "Main Goal";
   if (phase === "subgoals") return `Subgoal ${subgoalIndex + 1} of 8`;
-  return `Behaviors for Subgoal ${subgoalIndex + 1} of 8`;
+  if (phase === "subgoal-review") return `Subgoal ${subgoalIndex + 1} Review`;
+  if (phase === "behaviors") return `Behaviors for Subgoal ${subgoalIndex + 1} of 8`;
+  return `Behavior Review for Subgoal ${subgoalIndex + 1}`;
 }
 
 export function WizardProgressBar({ currentStep, totalSteps, phase, subgoalIndex }: ProgressBarProps) {

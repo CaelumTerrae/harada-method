@@ -7,15 +7,18 @@ import type { HaradaChart, Subgoal } from "./types";
 
 type HaradaStore = {
   charts: HaradaChart[];
+  aiFeedback: boolean;
   addChart: (mainGoal: string, subgoals: Subgoal[]) => string;
   deleteChart: (id: string) => void;
   getChart: (id: string) => HaradaChart | undefined;
+  setAiFeedback: (enabled: boolean) => void;
 };
 
 export const useHaradaStore = create<HaradaStore>()(
   persist(
     (set, get) => ({
       charts: [],
+      aiFeedback: false,
 
       addChart: (mainGoal, subgoals) => {
         const id = nanoid(10);
@@ -35,6 +38,10 @@ export const useHaradaStore = create<HaradaStore>()(
 
       getChart: (id) => {
         return get().charts.find((c) => c.id === id);
+      },
+
+      setAiFeedback: (enabled) => {
+        set({ aiFeedback: enabled });
       },
     }),
     {

@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { nanoid } from "nanoid";
 import { useHaradaStore } from "@/lib/store";
-import type { HaradaChart, Subgoal } from "@/lib/types";
+import type { HaradaChart, Subgoal, SubgoalReview, BehaviorReview } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { WizardProgressBar } from "@/components/wizard/progress-bar";
+import { StepAiFeedback } from "@/components/wizard/step-ai-feedback";
 import { StepMainGoal } from "@/components/wizard/step-main-goal";
 import { StepSubgoalName } from "@/components/wizard/step-subgoal-name";
 import { StepBehaviors } from "@/components/wizard/step-behaviors";
+import { StepSubgoalReview } from "@/components/wizard/step-subgoal-review";
+import { StepBehaviorReview } from "@/components/wizard/step-behavior-review";
 import { StepChartPreview } from "@/components/wizard/step-chart-preview";
 import { HaradaChartGrid } from "@/components/harada-chart";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const TOTAL_STEPS = 17;
 
 function createEmptySubgoals(): Subgoal[] {
   return Array.from({ length: 8 }, () => ({
@@ -25,24 +26,42 @@ function createEmptySubgoals(): Subgoal[] {
   }));
 }
 
-type Phase = "goal" | "subgoals" | "behaviors";
+type StepDescriptor =
+  | { phase: "ai-feedback"; sgIdx: -1 }
+  | { phase: "goal"; sgIdx: -1 }
+  | { phase: "subgoals"; sgIdx: number }
+  | { phase: "subgoal-review"; sgIdx: number }
+  | { phase: "behaviors"; sgIdx: number }
+  | { phase: "behavior-review"; sgIdx: number };
 
-function getPhase(step: number): Phase {
-  if (step === 0) return "goal";
-  if (step <= 8) return "subgoals";
-  return "behaviors";
-}
+function buildSteps(aiFeedback: boolean): StepDescriptor[] {
+  const steps: StepDescriptor[] = [
+    { phase: "ai-feedback", sgIdx: -1 },
+    { phase: "goal", sgIdx: -1 },
+  ];
 
-function getSubgoalIndex(step: number): number {
-  const phase = getPhase(step);
-  if (phase === "subgoals") return step - 1;
-  if (phase === "behaviors") return step - 9;
-  return -1;
+  for (let i = 0; i < 8; i++) {
+    steps.push({ phase: "subgoals", sgIdx: i });
+    if (aiFeedback) {
+      steps.push({ phase: "subgoal-review", sgIdx: i });
+    }
+  }
+
+  for (let i = 0; i < 8; i++) {
+    steps.push({ phase: "behaviors", sgIdx: i });
+    if (aiFeedback) {
+      steps.push({ phase: "behavior-review", sgIdx: i });
+    }
+  }
+
+  return steps;
 }
 
 export default function CreatePage() {
   const router = useRouter();
   const addChart = useHaradaStore((s) => s.addChart);
+  const aiFeedback = useHaradaStore((s) => s.aiFeedback);
+  const setAiFeedback = useHaradaStore((s) => s.setAiFeedback);
   const isMobile = useIsMobile();
 
   const [step, setStep] = useState(0);
@@ -51,8 +70,15 @@ export default function CreatePage() {
   const [animating, setAnimating] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
 
-  const phase = getPhase(step);
-  const sgIdx = getSubgoalIndex(step);
+  const [subgoalReviews, setSubgoalReviews] = useState<Record<number, SubgoalReview | null>>({});
+  const [behaviorReviews, setBehaviorReviews] = useState<Record<number, BehaviorReview[] | null>>({});
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+
+  const steps = useMemo(() => buildSteps(aiFeedback), [aiFeedback]);
+  const totalSteps = steps.length;
+  const currentStep = steps[step];
+  const { phase, sgIdx } = currentStep;
 
   const updateSubgoalText = useCallback(
     (index: number, value: string) => {
@@ -80,11 +106,17 @@ export default function CreatePage() {
 
   const canAdvance = showMobilePreview
     ? true
-    : phase === "goal"
-      ? mainGoal.trim().length > 0
-      : phase === "subgoals"
-        ? subgoals[sgIdx]?.text.trim().length > 0
-        : true;
+    : phase === "ai-feedback"
+      ? true
+      : phase === "goal"
+        ? mainGoal.trim().length > 0
+        : phase === "subgoals"
+          ? subgoals[sgIdx]?.text.trim().length > 0
+          : phase === "subgoal-review"
+            ? !reviewLoading
+            : phase === "behavior-review"
+              ? !reviewLoading
+              : true;
 
   const transition = (fn: () => void) => {
     setAnimating(true);
@@ -94,7 +126,79 @@ export default function CreatePage() {
     }, 150);
   };
 
-  const isMobilePreviewCheckpoint = isMobile && (step === 0 || step === 8);
+  const isGoalStep = phase === "goal";
+  const isLastSubgoalStep = phase === "subgoals" && sgIdx === 7;
+  const isLastSubgoalReviewStep = phase === "subgoal-review" && sgIdx === 7;
+  const isMobilePreviewCheckpoint =
+    isMobile && (isGoalStep || (aiFeedback ? isLastSubgoalReviewStep : isLastSubgoalStep));
+
+  const fetchSubgoalReview = useCallback(
+    async (subgoalIndex: number) => {
+      setReviewLoading(true);
+      setReviewError(null);
+      try {
+        const res = await fetch("/api/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "subgoal",
+            mainGoal: mainGoal.trim(),
+            subgoalText: subgoals[subgoalIndex].text.trim(),
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to get AI review");
+        }
+        const data: SubgoalReview = await res.json();
+        setSubgoalReviews((prev) => ({ ...prev, [subgoalIndex]: data }));
+      } catch (e) {
+        setReviewError(e instanceof Error ? e.message : "Something went wrong");
+      } finally {
+        setReviewLoading(false);
+      }
+    },
+    [mainGoal, subgoals]
+  );
+
+  const fetchBehaviorReview = useCallback(
+    async (subgoalIndex: number) => {
+      setReviewLoading(true);
+      setReviewError(null);
+      try {
+        const res = await fetch("/api/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "behaviors",
+            mainGoal: mainGoal.trim(),
+            subgoalText: subgoals[subgoalIndex].text.trim(),
+            behaviors: subgoals[subgoalIndex].behaviors,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to get AI review");
+        }
+        const data = await res.json();
+        setBehaviorReviews((prev) => ({ ...prev, [subgoalIndex]: data.reviews }));
+      } catch (e) {
+        setReviewError(e instanceof Error ? e.message : "Something went wrong");
+      } finally {
+        setReviewLoading(false);
+      }
+    },
+    [mainGoal, subgoals]
+  );
+
+  useEffect(() => {
+    if (phase === "subgoal-review" && !subgoalReviews[sgIdx] && !reviewLoading) {
+      fetchSubgoalReview(sgIdx);
+    }
+    if (phase === "behavior-review" && !behaviorReviews[sgIdx] && !reviewLoading) {
+      fetchBehaviorReview(sgIdx);
+    }
+  }, [phase, sgIdx, subgoalReviews, behaviorReviews, reviewLoading, fetchSubgoalReview, fetchBehaviorReview]);
 
   const handleNext = () => {
     if (isMobilePreviewCheckpoint && !showMobilePreview) {
@@ -110,7 +214,7 @@ export default function CreatePage() {
       return;
     }
 
-    if (step < TOTAL_STEPS - 1) {
+    if (step < totalSteps - 1) {
       transition(() => setStep(step + 1));
     } else {
       const id = addChart(mainGoal.trim(), subgoals);
@@ -138,7 +242,16 @@ export default function CreatePage() {
     [mainGoal, subgoals]
   );
 
-  const highlightSubgoal = phase === "subgoals" || phase === "behaviors" ? sgIdx : undefined;
+  const highlightSubgoal =
+    phase === "subgoals" || phase === "subgoal-review" || phase === "behaviors" || phase === "behavior-review"
+      ? sgIdx
+      : undefined;
+
+  const showGoalLabel = phase !== "ai-feedback" && phase !== "goal";
+
+  const mobilePreviewMessage = isGoalStep
+    ? "Here's your chart with your main goal. Next, you'll define 8 subgoals to support it."
+    : "Looking good! All 8 subgoals are set. Next, you'll add specific action items for each one.";
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,7 +264,7 @@ export default function CreatePage() {
           >
             &larr; Back to home
           </Link>
-          {step > 0 && (
+          {showGoalLabel && (
             <p className="text-xs text-muted-foreground/60 font-medium truncate max-w-xs">
               Goal: <span className="text-foreground/60">{mainGoal}</span>
             </p>
@@ -161,7 +274,7 @@ export default function CreatePage() {
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Left column: wizard form */}
           <div className="w-full lg:w-[420px] lg:shrink-0">
-            <WizardProgressBar currentStep={step} totalSteps={TOTAL_STEPS} phase={phase} subgoalIndex={sgIdx} />
+            <WizardProgressBar currentStep={step} totalSteps={totalSteps} phase={phase} subgoalIndex={sgIdx} />
 
             <div
               className={`min-h-[200px] transition-opacity duration-150 ${
@@ -171,15 +284,14 @@ export default function CreatePage() {
               {showMobilePreview ? (
                 <StepChartPreview
                   chart={partialChart}
-                  highlightSubgoal={step === 0 ? undefined : highlightSubgoal}
-                  message={
-                    step === 0
-                      ? "Here's your chart with your main goal. Next, you'll define 8 subgoals to support it."
-                      : "Looking good! All 8 subgoals are set. Next, you'll add specific action items for each one."
-                  }
+                  highlightSubgoal={isGoalStep ? undefined : highlightSubgoal}
+                  message={mobilePreviewMessage}
                 />
               ) : (
                 <>
+                  {phase === "ai-feedback" && (
+                    <StepAiFeedback value={aiFeedback} onChange={setAiFeedback} />
+                  )}
                   {phase === "goal" && (
                     <StepMainGoal value={mainGoal} onChange={setMainGoal} />
                   )}
@@ -191,6 +303,16 @@ export default function CreatePage() {
                       onChange={(v) => updateSubgoalText(sgIdx, v)}
                     />
                   )}
+                  {phase === "subgoal-review" && (
+                    <StepSubgoalReview
+                      key={sgIdx}
+                      subgoalIndex={sgIdx}
+                      subgoalText={subgoals[sgIdx].text}
+                      review={subgoalReviews[sgIdx] ?? null}
+                      loading={reviewLoading}
+                      error={reviewError}
+                    />
+                  )}
                   {phase === "behaviors" && (
                     <StepBehaviors
                       key={sgIdx}
@@ -198,6 +320,17 @@ export default function CreatePage() {
                       subgoalText={subgoals[sgIdx].text}
                       behaviors={subgoals[sgIdx].behaviors}
                       onBehaviorChange={(bi, v) => updateBehavior(sgIdx, bi, v)}
+                    />
+                  )}
+                  {phase === "behavior-review" && (
+                    <StepBehaviorReview
+                      key={sgIdx}
+                      subgoalIndex={sgIdx}
+                      subgoalText={subgoals[sgIdx].text}
+                      behaviors={subgoals[sgIdx].behaviors}
+                      reviews={behaviorReviews[sgIdx] ?? null}
+                      loading={reviewLoading}
+                      error={reviewError}
                     />
                   )}
                 </>
@@ -216,7 +349,7 @@ export default function CreatePage() {
                   &larr; Back
                 </Button>
                 <Button onClick={handleNext} disabled={!canAdvance} size="lg">
-                  {step === TOTAL_STEPS - 1 ? "Complete Chart" : "Continue \u2192"}
+                  {step === totalSteps - 1 ? "Complete Chart" : "Continue \u2192"}
                 </Button>
               </div>
             </div>
