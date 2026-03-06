@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 type StepMainGoalProps = {
   value: string;
@@ -9,7 +9,7 @@ type StepMainGoalProps = {
 
 export function StepMainGoal({ value, onChange }: StepMainGoalProps) {
   return (
-    <div>
+    <div className="text-center">
       <h2 className="font-serif text-3xl text-foreground mb-2">
         What is your main goal?
       </h2>
@@ -17,11 +17,11 @@ export function StepMainGoal({ value, onChange }: StepMainGoalProps) {
         This is the single ambitious goal at the center of your Harada chart.
         Think big — everything else will build toward this.
       </p>
-      <Textarea
+      <Input
         placeholder="e.g. Get drafted by an MLB team"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="text-base min-h-[120px] resize-none"
+        className="text-center text-lg"
         autoFocus
       />
     </div>

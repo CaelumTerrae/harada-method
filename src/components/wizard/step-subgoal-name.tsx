@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { SUBGOAL_COLORS } from "@/lib/colors";
 
 type StepSubgoalNameProps = {
@@ -13,8 +13,8 @@ export function StepSubgoalName({ index, value, onChange }: StepSubgoalNameProps
   const color = SUBGOAL_COLORS[index];
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-2">
+    <div className="text-center">
+      <div className="flex items-center justify-center gap-3 mb-2">
         <span
           className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${color.bg} ${color.text}`}
         >
@@ -29,11 +29,11 @@ export function StepSubgoalName({ index, value, onChange }: StepSubgoalNameProps
         category — fitness, knowledge, relationships, mindset — that you need
         to develop.
       </p>
-      <Textarea
+      <Input
         placeholder="e.g. Improve physical conditioning"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="text-base min-h-[100px] resize-none"
+        className="text-center text-lg"
         autoFocus
       />
     </div>

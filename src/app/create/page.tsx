@@ -11,6 +11,7 @@ import { WizardProgressBar } from "@/components/wizard/progress-bar";
 import { StepMainGoal } from "@/components/wizard/step-main-goal";
 import { StepSubgoalName } from "@/components/wizard/step-subgoal-name";
 import { StepBehaviors } from "@/components/wizard/step-behaviors";
+import { StepChartPreview } from "@/components/wizard/step-chart-preview";
 import { HaradaChartGrid } from "@/components/harada-chart";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -48,6 +49,7 @@ export default function CreatePage() {
   const [mainGoal, setMainGoal] = useState("");
   const [subgoals, setSubgoals] = useState<Subgoal[]>(createEmptySubgoals);
   const [animating, setAnimating] = useState(false);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   const phase = getPhase(step);
   const sgIdx = getSubgoalIndex(step);
@@ -76,8 +78,9 @@ export default function CreatePage() {
     []
   );
 
-  const canAdvance =
-    phase === "goal"
+  const canAdvance = showMobilePreview
+    ? true
+    : phase === "goal"
       ? mainGoal.trim().length > 0
       : phase === "subgoals"
         ? subgoals[sgIdx]?.text.trim().length > 0
@@ -91,7 +94,22 @@ export default function CreatePage() {
     }, 150);
   };
 
+  const isMobilePreviewCheckpoint = isMobile && (step === 0 || step === 8);
+
   const handleNext = () => {
+    if (isMobilePreviewCheckpoint && !showMobilePreview) {
+      transition(() => setShowMobilePreview(true));
+      return;
+    }
+
+    if (showMobilePreview) {
+      transition(() => {
+        setShowMobilePreview(false);
+        setStep(step + 1);
+      });
+      return;
+    }
+
     if (step < TOTAL_STEPS - 1) {
       transition(() => setStep(step + 1));
     } else {
@@ -101,6 +119,10 @@ export default function CreatePage() {
   };
 
   const handleBack = () => {
+    if (showMobilePreview) {
+      transition(() => setShowMobilePreview(false));
+      return;
+    }
     if (step > 0) {
       transition(() => setStep(step - 1));
     }
@@ -142,45 +164,61 @@ export default function CreatePage() {
             <WizardProgressBar currentStep={step} totalSteps={TOTAL_STEPS} phase={phase} subgoalIndex={sgIdx} />
 
             <div
-              className={`min-h-[420px] transition-opacity duration-150 ${
+              className={`min-h-[200px] transition-opacity duration-150 ${
                 animating ? "opacity-0" : "opacity-100"
               }`}
             >
-              {phase === "goal" && (
-                <StepMainGoal value={mainGoal} onChange={setMainGoal} />
-              )}
-              {phase === "subgoals" && (
-                <StepSubgoalName
-                  key={sgIdx}
-                  index={sgIdx}
-                  value={subgoals[sgIdx].text}
-                  onChange={(v) => updateSubgoalText(sgIdx, v)}
+              {showMobilePreview ? (
+                <StepChartPreview
+                  chart={partialChart}
+                  highlightSubgoal={step === 0 ? undefined : highlightSubgoal}
+                  message={
+                    step === 0
+                      ? "Here's your chart with your main goal. Next, you'll define 8 subgoals to support it."
+                      : "Looking good! All 8 subgoals are set. Next, you'll add specific action items for each one."
+                  }
                 />
-              )}
-              {phase === "behaviors" && (
-                <StepBehaviors
-                  key={sgIdx}
-                  subgoalIndex={sgIdx}
-                  subgoalText={subgoals[sgIdx].text}
-                  behaviors={subgoals[sgIdx].behaviors}
-                  onBehaviorChange={(bi, v) => updateBehavior(sgIdx, bi, v)}
-                />
+              ) : (
+                <>
+                  {phase === "goal" && (
+                    <StepMainGoal value={mainGoal} onChange={setMainGoal} />
+                  )}
+                  {phase === "subgoals" && (
+                    <StepSubgoalName
+                      key={sgIdx}
+                      index={sgIdx}
+                      value={subgoals[sgIdx].text}
+                      onChange={(v) => updateSubgoalText(sgIdx, v)}
+                    />
+                  )}
+                  {phase === "behaviors" && (
+                    <StepBehaviors
+                      key={sgIdx}
+                      subgoalIndex={sgIdx}
+                      subgoalText={subgoals[sgIdx].text}
+                      behaviors={subgoals[sgIdx].behaviors}
+                      onBehaviorChange={(bi, v) => updateBehavior(sgIdx, bi, v)}
+                    />
+                  )}
+                </>
               )}
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-10 pt-6 border-t border-border/40">
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                disabled={step === 0}
-                className="text-muted-foreground"
-              >
-                &larr; Back
-              </Button>
-              <Button onClick={handleNext} disabled={!canAdvance} size="lg">
-                {step === TOTAL_STEPS - 1 ? "Complete Chart" : "Continue \u2192"}
-              </Button>
+            <div className="sticky bottom-0 bg-background pt-4 pb-6 -mx-4 px-4 sm:-mx-6 sm:px-6 border-t border-border/40 lg:static lg:mx-0 lg:px-0 lg:mt-10 lg:pt-6 lg:pb-0">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={step === 0 && !showMobilePreview}
+                  className="text-muted-foreground"
+                >
+                  &larr; Back
+                </Button>
+                <Button onClick={handleNext} disabled={!canAdvance} size="lg">
+                  {step === TOTAL_STEPS - 1 ? "Complete Chart" : "Continue \u2192"}
+                </Button>
+              </div>
             </div>
           </div>
 
