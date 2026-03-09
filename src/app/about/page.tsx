@@ -1,17 +1,11 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "About — Harada Method",
-  description:
-    "Learn about the Harada Method, a structured goal-setting framework created by Takashi Harada, and how Shohei Ohtani used it to become one of the greatest baseball players of all time.",
-};
+import Link from "next/link";
+import { DialogueBox } from "@/components/dialogue-box";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="h-1 bg-gradient-to-r from-lime-200 via-green-200 via-yellow-200 to-amber-200" />
-
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
         <Link
           href="/"
@@ -21,21 +15,28 @@ export default function AboutPage() {
         </Link>
 
         <header className="mt-8 mb-10 sm:mt-12 sm:mb-16">
-          <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-4">
+          <p className="font-pixel text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
             About
           </p>
-          <h1 className="font-serif text-3xl sm:text-5xl tracking-tight text-foreground leading-[1.1]">
+          <h1 className="font-pixel text-xl sm:text-3xl tracking-tight text-foreground leading-[1.4]">
             The Harada
             <br />
-            <span className="text-muted-foreground/40">Method</span>
+            <span className="text-muted-foreground/60">Method</span>
           </h1>
         </header>
 
+        <div className="mb-10">
+          <DialogueBox
+            text="Alright, sit down and listen. I'm gonna tell ya about the Harada Method — and why it works."
+            speed={20}
+          />
+        </div>
+
         <section className="mb-16">
-          <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
+          <h2 className="font-pixel text-[10px] uppercase tracking-widest text-muted-foreground mb-6">
             What is it?
           </h2>
-          <div className="space-y-4 text-base leading-relaxed text-muted-foreground">
+          <div className="space-y-4 text-lg leading-relaxed text-muted-foreground">
             <p>
               The Harada Method is a structured goal-setting and
               self-management framework developed by{" "}
@@ -86,21 +87,21 @@ export default function AboutPage() {
                 desc: "Seek guidance from mentors to stay accountable and course-correct.",
               },
             ].map((item) => (
-              <div key={item.num}>
-                <p className="font-serif text-xl text-foreground/20 mb-1">
+              <div key={item.num} className="dialogue-border p-3 bg-card">
+                <p className="font-pixel text-sm text-foreground/30 mb-1">
                   {item.num}
                 </p>
-                <p className="font-medium text-sm text-foreground mb-1">
+                <p className="font-pixel text-[10px] text-foreground mb-1 leading-relaxed">
                   {item.title}
                 </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {item.desc}
                 </p>
               </div>
             ))}
           </div>
 
-          <p className="mt-8 text-base leading-relaxed text-muted-foreground">
+          <p className="mt-8 text-lg leading-relaxed text-muted-foreground">
             The centerpiece is the{" "}
             <span className="text-foreground font-medium">
               64-action chart
@@ -114,10 +115,10 @@ export default function AboutPage() {
         </section>
 
         <section className="mb-16">
-          <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
+          <h2 className="font-pixel text-[10px] uppercase tracking-widest text-muted-foreground mb-6">
             Shohei Ohtani & the Harada Method
           </h2>
-          <div className="space-y-4 text-base leading-relaxed text-muted-foreground">
+          <div className="space-y-4 text-lg leading-relaxed text-muted-foreground">
             <p>
               One of the most famous practitioners of the Harada Method is{" "}
               <span className="text-foreground font-medium">
@@ -165,10 +166,10 @@ export default function AboutPage() {
         </section>
 
         <section className="mb-20">
-          <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
+          <h2 className="font-pixel text-[10px] uppercase tracking-widest text-muted-foreground mb-6">
             Why this site?
           </h2>
-          <p className="text-base leading-relaxed text-muted-foreground">
+          <p className="text-lg leading-relaxed text-muted-foreground">
             This site was inspired by Ohtani&apos;s use of the Harada
             Method. The goal is to make the 64-action chart accessible as a
             free, digital tool &mdash; so anyone can map out their
@@ -180,7 +181,7 @@ export default function AboutPage() {
         <div className="border-t border-border/40 pt-8">
           <Link
             href="/create"
-            className="text-sm font-medium text-foreground hover:text-foreground/70 transition-colors"
+            className="font-pixel text-[10px] text-foreground hover:text-foreground/70 transition-colors"
           >
             Start your own chart &rarr;
           </Link>

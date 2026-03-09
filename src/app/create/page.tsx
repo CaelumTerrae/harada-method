@@ -250,8 +250,8 @@ export default function CreatePage() {
   const showGoalLabel = phase !== "ai-feedback" && phase !== "goal";
 
   const mobilePreviewMessage = isGoalStep
-    ? "Here's your chart with your main goal. Next, you'll define 8 subgoals to support it."
-    : "Looking good! All 8 subgoals are set. Next, you'll add specific action items for each one.";
+    ? "There's your chart with your big goal in the middle. Now we're gonna fill in 8 subgoals around it. Keep up!"
+    : "Not bad, kid! All 8 subgoals are locked in. Now comes the real work — 8 behaviors for each one. Let's go.";
 
   return (
     <div className="min-h-screen bg-background">
@@ -265,7 +265,7 @@ export default function CreatePage() {
             &larr; Back to home
           </Link>
           {showGoalLabel && (
-            <p className="text-xs text-muted-foreground/60 font-medium truncate max-w-xs">
+            <p className="font-pixel text-[8px] text-muted-foreground/60 truncate max-w-xs">
               Goal: <span className="text-foreground/60">{mainGoal}</span>
             </p>
           )}
@@ -348,7 +348,7 @@ export default function CreatePage() {
                 >
                   &larr; Back
                 </Button>
-                <Button onClick={handleNext} disabled={!canAdvance} size="lg">
+                <Button onClick={handleNext} disabled={!canAdvance} size="lg" className="font-pixel text-[10px]">
                   {step === totalSteps - 1 ? "Complete Chart" : "Continue \u2192"}
                 </Button>
               </div>
@@ -358,7 +358,7 @@ export default function CreatePage() {
           {/* Right column: live chart preview (hidden on mobile) */}
           {!isMobile && (
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-4">
+              <p className="font-pixel text-[8px] uppercase tracking-widest text-muted-foreground mb-4">
                 Live Preview
               </p>
               <HaradaChartGrid

@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Libre_Franklin } from "next/font/google";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
-const serif = DM_Serif_Display({
+const pixel = Press_Start_2P({
   weight: "400",
-  variable: "--font-serif",
+  variable: "--font-pixel",
   subsets: ["latin"],
 });
 
-const sans = Libre_Franklin({
+const mono = VT323({
+  weight: "400",
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Harada — Goal Setting Method",
+  title: "i oughta — Goal Setting Method",
   description:
-    "Set and accomplish your goals using the Harada Method. Break your main goal into 8 subgoals and 64 actionable behaviors.",
+    "Set and accomplish your goals with a grumpy old man's help. Break your main goal into 8 subgoals and 64 actionable behaviors.",
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${serif.variable} ${sans.variable} font-sans antialiased`}>
+      <body className={`${pixel.variable} ${mono.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import type { HaradaChart } from "@/lib/types";
 import { HaradaChartGrid } from "@/components/harada-chart";
+import { DialogueBox } from "@/components/dialogue-box";
 
 type StepChartPreviewProps = {
   chart: HaradaChart;
@@ -11,18 +12,21 @@ type StepChartPreviewProps = {
 
 export function StepChartPreview({ chart, highlightSubgoal, message }: StepChartPreviewProps) {
   return (
-    <div className="text-center">
-      <h2 className="font-serif text-3xl text-foreground mb-2">
-        Your Harada Chart
+    <div>
+      <h2 className="font-pixel text-xs text-foreground mb-4 text-center">
+        Your Chart
       </h2>
-      <p className="text-muted-foreground mb-6 leading-relaxed">
-        {message}
-      </p>
-      <HaradaChartGrid
-        chart={chart}
-        highlightSubgoal={highlightSubgoal}
-        compact
+      <DialogueBox
+        text={message}
+        speed={20}
       />
+      <div className="mt-6">
+        <HaradaChartGrid
+          chart={chart}
+          highlightSubgoal={highlightSubgoal}
+          compact
+        />
+      </div>
     </div>
   );
 }

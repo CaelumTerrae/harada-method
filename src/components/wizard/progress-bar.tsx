@@ -1,7 +1,5 @@
 "use client";
 
-import { Progress } from "@/components/ui/progress";
-
 type Phase = "ai-feedback" | "goal" | "subgoals" | "subgoal-review" | "behaviors" | "behavior-review";
 
 type ProgressBarProps = {
@@ -23,18 +21,28 @@ function getPhaseLabel(phase: Phase, subgoalIndex: number): string {
 export function WizardProgressBar({ currentStep, totalSteps, phase, subgoalIndex }: ProgressBarProps) {
   const pct = ((currentStep + 1) / totalSteps) * 100;
   const label = getPhaseLabel(phase, subgoalIndex);
+  const filledSegments = Math.round((pct / 100) * 20);
 
   return (
     <div className="mb-10">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-sm font-medium text-foreground">
+        <p className="font-pixel text-[8px] text-foreground">
           {label}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {Math.round(pct)}% complete
+        <p className="font-pixel text-[8px] text-muted-foreground">
+          {Math.round(pct)}%
         </p>
       </div>
-      <Progress value={pct} className="h-1.5" />
+      <div className="flex gap-1">
+        {Array.from({ length: 20 }, (_, i) => (
+          <div
+            key={i}
+            className={`h-3 flex-1 border border-foreground/30 ${
+              i < filledSegments ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }

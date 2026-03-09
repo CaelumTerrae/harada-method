@@ -4,6 +4,7 @@ import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { SUBGOAL_COLORS } from "@/lib/colors";
 import type { BehaviorReview } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { DialogueBox } from "@/components/dialogue-box";
 
 type StepBehaviorReviewProps = {
   subgoalIndex: number;
@@ -28,27 +29,33 @@ export function StepBehaviorReview({
     <div>
       <div className="flex items-center gap-3 mb-1">
         <span
-          className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${color.bg} ${color.text}`}
+          className={`inline-flex h-7 w-7 items-center justify-center text-xs font-pixel ${color.bg} ${color.text} border-2 border-foreground`}
         >
           {subgoalIndex + 1}
         </span>
-        <h2 className="font-serif text-2xl text-foreground">
+        <h2 className="font-pixel text-xs text-foreground">
           Behavior Review
         </h2>
       </div>
-      <p className={`text-sm font-medium mb-6 ${color.text}`}>
+      <p className={`text-sm font-medium mb-4 ${color.text}`}>
         For: {subgoalText}
       </p>
 
       {loading && (
-        <div className="flex flex-col items-center gap-4 py-10">
-          <Loader2 className="size-8 text-muted-foreground animate-spin" />
-          <p className="text-sm text-muted-foreground">Reviewing your behaviors...</p>
-        </div>
+        <>
+          <DialogueBox
+            text="Lemme check these behaviors... some of 'em better be good."
+            speed={25}
+          />
+          <div className="flex items-center gap-3 mt-4 text-muted-foreground">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Reviewing...</span>
+          </div>
+        </>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="dialogue-border bg-red-50 p-4">
           <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
@@ -63,10 +70,10 @@ export function StepBehaviorReview({
               <div
                 key={review.index}
                 className={cn(
-                  "rounded-lg border p-3",
+                  "dialogue-border p-3",
                   review.fit
-                    ? "border-emerald-200 bg-emerald-50/50"
-                    : "border-amber-200 bg-amber-50/50"
+                    ? "bg-emerald-50/50"
+                    : "bg-amber-50/50"
                 )}
               >
                 <div className="flex items-start gap-2.5">
@@ -95,8 +102,8 @@ export function StepBehaviorReview({
             );
           })}
 
-          <p className="text-xs text-muted-foreground pt-2">
-            This is AI-generated feedback. You can continue regardless of the results.
+          <p className="font-pixel text-[8px] text-muted-foreground pt-2">
+            AI feedback. You can continue regardless.
           </p>
         </div>
       )}

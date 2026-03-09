@@ -4,6 +4,7 @@ import { Loader2, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import { SUBGOAL_COLORS } from "@/lib/colors";
 import type { SubgoalReview } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { DialogueBox } from "@/components/dialogue-box";
 
 type StepSubgoalReviewProps = {
   subgoalIndex: number;
@@ -50,41 +51,50 @@ export function StepSubgoalReview({
     <div>
       <div className="flex items-center gap-3 mb-1">
         <span
-          className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold ${color.bg} ${color.text}`}
+          className={`inline-flex h-7 w-7 items-center justify-center text-xs font-pixel ${color.bg} ${color.text} border-2 border-foreground`}
         >
           {subgoalIndex + 1}
         </span>
-        <h2 className="font-serif text-2xl text-foreground">
+        <h2 className="font-pixel text-xs text-foreground">
           Subgoal Review
         </h2>
       </div>
-      <p className={`text-sm font-medium mb-6 ${color.text}`}>
+      <p className={`text-sm font-medium mb-4 ${color.text}`}>
         {subgoalText}
       </p>
 
       {loading && (
-        <div className="flex flex-col items-center gap-4 py-10">
-          <Loader2 className="size-8 text-muted-foreground animate-spin" />
-          <p className="text-sm text-muted-foreground">Analyzing your subgoal...</p>
+        <DialogueBox
+          text="Hold on... lemme get the AI to take a look at this..."
+          speed={30}
+          showSprite={true}
+        />
+      )}
+
+      {loading && (
+        <div className="flex items-center gap-3 mt-4 text-muted-foreground">
+          <Loader2 className="size-5 animate-spin" />
+          <span className="text-sm">Analyzing...</span>
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="dialogue-border bg-red-50 p-4 mt-4">
           <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
       {!loading && !error && review && (
         <div className="space-y-4">
-          <RatingBadge rating={review.rating} />
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-sm text-foreground leading-relaxed">
-              {review.feedback}
-            </p>
+          <DialogueBox
+            text={review.feedback}
+            speed={15}
+          />
+          <div className="mt-4">
+            <RatingBadge rating={review.rating} />
           </div>
-          <p className="text-xs text-muted-foreground">
-            This is AI-generated feedback. You can continue regardless of the rating.
+          <p className="font-pixel text-[8px] text-muted-foreground">
+            AI feedback. You can continue regardless.
           </p>
         </div>
       )}
@@ -97,9 +107,9 @@ function RatingBadge({ rating }: { rating: SubgoalReview["rating"] }) {
   const Icon = config.icon;
 
   return (
-    <div className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2", config.badgeBg)}>
+    <div className={cn("inline-flex items-center gap-2 px-4 py-2 border-2 border-foreground", config.badgeBg)}>
       <Icon className={cn("size-4", config.iconColor)} />
-      <span className={cn("text-sm font-semibold", config.badgeText)}>
+      <span className={cn("font-pixel text-[8px]", config.badgeText)}>
         {config.label}
       </span>
     </div>

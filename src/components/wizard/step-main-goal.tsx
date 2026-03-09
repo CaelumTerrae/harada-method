@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { DialogueBox } from "@/components/dialogue-box";
 
 type StepMainGoalProps = {
   value: string;
@@ -9,21 +10,20 @@ type StepMainGoalProps = {
 
 export function StepMainGoal({ value, onChange }: StepMainGoalProps) {
   return (
-    <div className="text-center">
-      <h2 className="font-serif text-3xl text-foreground mb-2">
-        What is your main goal?
-      </h2>
-      <p className="text-muted-foreground mb-8 leading-relaxed">
-        This is the single ambitious goal at the center of your Harada chart.
-        Think big — everything else will build toward this.
-      </p>
-      <Input
-        placeholder="e.g. Get drafted by an MLB team"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="text-center text-lg"
-        autoFocus
+    <div>
+      <DialogueBox
+        text="Alright, what's the ONE big thing you wanna accomplish? Think big — this is the center of everything. Don't be a wimp about it."
+        speed={20}
       />
+      <div className="mt-6">
+        <Input
+          placeholder="e.g. Get drafted by an MLB team"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="text-center text-lg"
+          autoFocus
+        />
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DialogueBox } from "@/components/dialogue-box";
 
 type StepAiFeedbackProps = {
   value: boolean;
@@ -10,36 +11,26 @@ type StepAiFeedbackProps = {
 
 export function StepAiFeedback({ value, onChange }: StepAiFeedbackProps) {
   return (
-    <div className="text-center">
-      <h2 className="font-serif text-3xl text-foreground mb-2">
-        Would you like AI feedback?
-      </h2>
-      <p className="text-muted-foreground mb-4 leading-relaxed">
-        When enabled, AI will review each of your subgoals and behaviors as you
-        build your chart. After entering each subgoal, you&apos;ll see a rating
-        (low/medium/high) on how well it supports your main goal, with
-        suggestions for improvement. After entering behaviors, you&apos;ll get a
-        per-behavior assessment of fit.
-      </p>
-      <p className="text-xs text-muted-foreground/70 mb-8 leading-relaxed">
-        Your goal data is sent to OpenAI for analysis. You can always continue
-        past any review.
-      </p>
+    <div>
+      <DialogueBox
+        text="Before we start, kid — you want me to get my buddy the AI to check your work? He'll rate your subgoals and behaviors as you go. Your call."
+        speed={20}
+      />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mt-6">
         <button
           type="button"
           onClick={() => onChange(true)}
           className={cn(
-            "group relative flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all",
+            "group relative flex flex-col items-center gap-3 p-6 transition-all dialogue-border",
             value
-              ? "border-primary bg-primary/5 shadow-sm"
-              : "border-border hover:border-primary/40 hover:bg-muted/30"
+              ? "bg-primary/10"
+              : "bg-card hover:bg-muted/50"
           )}
         >
           <div
             className={cn(
-              "flex size-12 items-center justify-center rounded-full transition-colors",
+              "flex size-12 items-center justify-center rounded-none border-2 border-foreground transition-colors",
               value
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
@@ -47,22 +38,22 @@ export function StepAiFeedback({ value, onChange }: StepAiFeedbackProps) {
           >
             <Sparkles className="size-5" />
           </div>
-          <span className="text-sm font-medium">Yes, enable AI feedback</span>
+          <span className="font-pixel text-[8px] leading-relaxed">Yes, enable AI</span>
         </button>
 
         <button
           type="button"
           onClick={() => onChange(false)}
           className={cn(
-            "group relative flex flex-col items-center gap-3 rounded-xl border-2 p-6 transition-all",
+            "group relative flex flex-col items-center gap-3 p-6 transition-all dialogue-border",
             !value
-              ? "border-primary bg-primary/5 shadow-sm"
-              : "border-border hover:border-primary/40 hover:bg-muted/30"
+              ? "bg-primary/10"
+              : "bg-card hover:bg-muted/50"
           )}
         >
           <div
             className={cn(
-              "flex size-12 items-center justify-center rounded-full transition-colors",
+              "flex size-12 items-center justify-center rounded-none border-2 border-foreground transition-colors",
               !value
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
@@ -70,7 +61,7 @@ export function StepAiFeedback({ value, onChange }: StepAiFeedbackProps) {
           >
             <X className="size-5" />
           </div>
-          <span className="text-sm font-medium">No thanks</span>
+          <span className="font-pixel text-[8px] leading-relaxed">No thanks</span>
         </button>
       </div>
     </div>

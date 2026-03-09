@@ -133,7 +133,7 @@ export function HaradaChartGrid({ chart, highlightSubgoal, compact }: HaradaChar
 
             let bgClass = "bg-green-50/40";
             if (isGoal) {
-              bgClass = "bg-[#767522]";
+              bgClass = "bg-[#5a4630]";
             } else if (isSubgoal && color) {
               bgClass = color.accent;
             } else if (color) {
@@ -141,9 +141,9 @@ export function HaradaChartGrid({ chart, highlightSubgoal, compact }: HaradaChar
             }
 
             const textClass = isGoal
-              ? `text-white font-serif ${compact ? "text-[9px]" : "text-sm"} font-medium leading-snug`
+              ? `text-white font-pixel ${compact ? "text-[6px]" : "text-[8px]"} leading-snug`
               : isSubgoal
-                ? `${color?.text ?? "text-foreground"} font-serif ${compact ? "text-[8px]" : "text-[11px]"} font-medium leading-snug`
+                ? `${color?.text ?? "text-foreground"} font-pixel ${compact ? "text-[5px]" : "text-[7px]"} leading-snug`
                 : `${color?.text ?? "text-muted-foreground"} ${compact ? "text-[7px]" : "text-[10px]"} leading-tight`;
 
             const isBlockBorderR = (c + 1) % 3 === 0 && c < 8;

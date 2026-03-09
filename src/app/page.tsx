@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useHaradaStore } from "@/lib/store";
 import { ChartCard } from "@/components/chart-card";
 import { Button } from "@/components/ui/button";
+import { DialogueBox } from "@/components/dialogue-box";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -16,28 +18,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Subtle decorative top bar */}
-      <div className="h-1 bg-gradient-to-r from-lime-200 via-green-200 via-yellow-200 to-amber-200" />
-
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-20">
         {/* Hero */}
         <header className="mb-12 sm:mb-20">
-          <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-4">
-            Goal-Setting Framework
-          </p>
-          <h1 className="font-serif text-4xl sm:text-6xl tracking-tight text-foreground leading-[1.1]">
-            Harada
-            <br />
-            <span className="text-muted-foreground/40">Method</span>
-          </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
-            Turn one ambitious goal into 64 concrete, actionable behaviors.
-            Define 8 subgoals, break each into 8 daily practices, and see your
-            entire plan on a single chart.
-          </p>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mt-8 sm:mt-10">
+          <div className="flex flex-col items-center text-center mb-8">
+            <Image
+              src="/old-man.png"
+              alt="Grumpy old man"
+              width={160}
+              height={160}
+              className="pixelated mb-6"
+              style={{ imageRendering: "pixelated" }}
+              priority
+            />
+            <h1 className="font-pixel text-3xl sm:text-5xl tracking-tight text-foreground leading-[1.4]">
+              i oughta
+            </h1>
+          </div>
+
+          <DialogueBox
+            text="Listen up, kid. You got ONE big goal? Good. I'm gonna help you break it into 64 things you oughta be doing every single day. No excuses."
+            speed={20}
+          />
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
             <Link href="/create">
-              <Button size="lg" className="text-base px-10 h-12">
+              <Button size="lg" className="font-pixel text-xs px-10 h-12">
                 Start a New Chart
               </Button>
             </Link>
@@ -52,7 +58,7 @@ export default function Home() {
 
         {/* How it works */}
         <section className="mb-12 sm:mb-20">
-          <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-8">
+          <h2 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground mb-8">
             How it works
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
@@ -61,14 +67,14 @@ export default function Home() {
               { step: "02", title: "8 subgoals", desc: "Break it into 8 supporting areas." },
               { step: "03", title: "64 behaviors", desc: "Define 8 actions per subgoal." },
             ].map((item) => (
-              <div key={item.step}>
-                <p className="font-serif text-2xl text-foreground/20 mb-2">
+              <div key={item.step} className="dialogue-border p-4 bg-card">
+                <p className="font-pixel text-lg text-foreground/30 mb-2">
                   {item.step}
                 </p>
-                <p className="font-medium text-sm text-foreground mb-1">
+                <p className="font-pixel text-[10px] text-foreground mb-1 leading-relaxed">
                   {item.title}
                 </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -79,7 +85,7 @@ export default function Home() {
         {/* Saved Charts */}
         {hydrated && charts.length > 0 && (
           <section>
-            <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground mb-6">
+            <h2 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground mb-6">
               Your Charts
             </h2>
             <div className="flex flex-col gap-3">
