@@ -24,7 +24,6 @@ export function HaradaChartRegion({ chart, region, compact }: HaradaChartRegionP
         className="grid"
         style={{
           gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gridTemplateRows: `repeat(3, minmax(${compact ? "56px" : "80px"}, auto))`,
         }}
       >
         {block.flatMap((row, r) =>
@@ -54,6 +53,7 @@ export function HaradaChartRegion({ chart, region, compact }: HaradaChartRegionP
               <div
                 key={`${r}-${c}`}
                 className={[
+                  "aspect-square",
                   bgClass,
                   textClass,
                   `flex items-center justify-center text-center ${compact ? "p-1" : "p-2"}`,

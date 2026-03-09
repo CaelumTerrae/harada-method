@@ -357,14 +357,13 @@ export default function CreatePage() {
 
           {/* Right column: live chart preview (hidden on mobile) */}
           {!isMobile && phase !== "ai-feedback" && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 max-w-lg">
               <p className="font-pixel text-[8px] uppercase tracking-widest text-muted-foreground mb-4">
                 Live Preview
               </p>
               <HaradaChartRegion
                 chart={partialChart}
                 region={previewRegion}
-                compact
               />
             </div>
           )}
