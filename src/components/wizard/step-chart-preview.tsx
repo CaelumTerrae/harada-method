@@ -1,16 +1,16 @@
 "use client";
 
 import type { HaradaChart } from "@/lib/types";
-import { HaradaChartGrid } from "@/components/harada-chart";
+import { HaradaChartRegion } from "@/components/harada-chart-region";
 import { DialogueBox } from "@/components/dialogue-box";
 
 type StepChartPreviewProps = {
   chart: HaradaChart;
-  highlightSubgoal?: number;
+  region: "center" | number;
   message: string;
 };
 
-export function StepChartPreview({ chart, highlightSubgoal, message }: StepChartPreviewProps) {
+export function StepChartPreview({ chart, region, message }: StepChartPreviewProps) {
   return (
     <div>
       <h2 className="font-pixel text-xs text-foreground mb-4 text-center">
@@ -21,9 +21,9 @@ export function StepChartPreview({ chart, highlightSubgoal, message }: StepChart
         speed={20}
       />
       <div className="mt-6">
-        <HaradaChartGrid
+        <HaradaChartRegion
           chart={chart}
-          highlightSubgoal={highlightSubgoal}
+          region={region}
           compact
         />
       </div>

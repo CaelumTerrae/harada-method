@@ -15,7 +15,7 @@ import { StepBehaviors } from "@/components/wizard/step-behaviors";
 import { StepSubgoalReview } from "@/components/wizard/step-subgoal-review";
 import { StepBehaviorReview } from "@/components/wizard/step-behavior-review";
 import { StepChartPreview } from "@/components/wizard/step-chart-preview";
-import { HaradaChartGrid } from "@/components/harada-chart";
+import { HaradaChartRegion } from "@/components/harada-chart-region";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 function createEmptySubgoals(): Subgoal[] {
@@ -242,10 +242,10 @@ export default function CreatePage() {
     [mainGoal, subgoals]
   );
 
-  const highlightSubgoal =
-    phase === "subgoals" || phase === "subgoal-review" || phase === "behaviors" || phase === "behavior-review"
+  const previewRegion: "center" | number =
+    phase === "behaviors" || phase === "behavior-review"
       ? sgIdx
-      : undefined;
+      : "center";
 
   const showGoalLabel = phase !== "ai-feedback" && phase !== "goal";
 
@@ -284,7 +284,7 @@ export default function CreatePage() {
               {showMobilePreview ? (
                 <StepChartPreview
                   chart={partialChart}
-                  highlightSubgoal={isGoalStep ? undefined : highlightSubgoal}
+                  region="center"
                   message={mobilePreviewMessage}
                 />
               ) : (
@@ -356,14 +356,14 @@ export default function CreatePage() {
           </div>
 
           {/* Right column: live chart preview (hidden on mobile) */}
-          {!isMobile && (
+          {!isMobile && phase !== "ai-feedback" && (
             <div className="flex-1 min-w-0">
               <p className="font-pixel text-[8px] uppercase tracking-widest text-muted-foreground mb-4">
                 Live Preview
               </p>
-              <HaradaChartGrid
+              <HaradaChartRegion
                 chart={partialChart}
-                highlightSubgoal={highlightSubgoal}
+                region={previewRegion}
                 compact
               />
             </div>
