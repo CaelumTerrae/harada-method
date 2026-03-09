@@ -74,6 +74,7 @@ export default function CreatePage() {
   const [behaviorReviews, setBehaviorReviews] = useState<Record<number, BehaviorReview[] | null>>({});
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [generatingBehaviors, setGeneratingBehaviors] = useState(false);
 
   const steps = useMemo(() => buildSteps(aiFeedback), [aiFeedback]);
   const totalSteps = steps.length;
@@ -186,6 +187,38 @@ export default function CreatePage() {
         setReviewError(e instanceof Error ? e.message : "Something went wrong");
       } finally {
         setReviewLoading(false);
+      }
+    },
+    [mainGoal, subgoals]
+  );
+
+  const fetchGeneratedBehaviors = useCallback(
+    async (subgoalIndex: number) => {
+      setGeneratingBehaviors(true);
+      try {
+        const res = await fetch("/api/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "generate-behaviors",
+            mainGoal: mainGoal.trim(),
+            subgoalText: subgoals[subgoalIndex].text.trim(),
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Failed to generate behaviors");
+        }
+        const data: { behaviors: string[] } = await res.json();
+        setSubgoals((prev) => {
+          const next = [...prev];
+          next[subgoalIndex] = { ...next[subgoalIndex], behaviors: data.behaviors };
+          return next;
+        });
+      } catch {
+        // Silently fail — the user can still type manually
+      } finally {
+        setGeneratingBehaviors(false);
       }
     },
     [mainGoal, subgoals]
@@ -320,6 +353,9 @@ export default function CreatePage() {
                       subgoalText={subgoals[sgIdx].text}
                       behaviors={subgoals[sgIdx].behaviors}
                       onBehaviorChange={(bi, v) => updateBehavior(sgIdx, bi, v)}
+                      aiFeedback={aiFeedback}
+                      onGenerateBehaviors={() => fetchGeneratedBehaviors(sgIdx)}
+                      generating={generatingBehaviors}
                     />
                   )}
                   {phase === "behavior-review" && (

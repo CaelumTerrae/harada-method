@@ -32,7 +32,13 @@ type BehaviorReviewRequest = {
   behaviors: string[];
 };
 
-type ReviewRequest = SubgoalReviewRequest | BehaviorReviewRequest;
+type GenerateBehaviorsRequest = {
+  type: "generate-behaviors";
+  mainGoal: string;
+  subgoalText: string;
+};
+
+type ReviewRequest = SubgoalReviewRequest | BehaviorReviewRequest | GenerateBehaviorsRequest;
 
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
@@ -48,6 +54,8 @@ export async function POST(req: NextRequest) {
     return handleSubgoalReview(body);
   } else if (body.type === "behaviors") {
     return handleBehaviorReview(body);
+  } else if (body.type === "generate-behaviors") {
+    return handleGenerateBehaviors(body);
   }
 
   return NextResponse.json({ error: "Invalid review type" }, { status: 400 });
@@ -161,4 +169,51 @@ Only include reviews for the behaviors listed above (skip empty ones).`,
   });
 
   return NextResponse.json({ reviews });
+}
+
+async function handleGenerateBehaviors(body: GenerateBehaviorsRequest) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0.7,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: HARADA_SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: `Generate exactly 8 behaviors for the following subgoal according to the Harada Method.
+
+Main Goal: "${body.mainGoal}"
+Subgoal: "${body.subgoalText}"
+
+Respond with JSON: { "behaviors": ["behavior1", "behavior2", ..., "behavior8"] }
+
+Each behavior must be:
+- A concrete, specific daily or weekly action (not a vague aspiration)
+- Directly contributing to the subgoal
+- Measurable or observable
+- Short (under 10 words ideally, 15 max)
+
+Return exactly 8 behaviors.`,
+      },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    return NextResponse.json(
+      { error: "No response from AI" },
+      { status: 500 }
+    );
+  }
+
+  const parsed = JSON.parse(content);
+  const behaviors: string[] = Array.isArray(parsed.behaviors)
+    ? parsed.behaviors.slice(0, 8).map((b: unknown) => String(b))
+    : [];
+
+  while (behaviors.length < 8) {
+    behaviors.push("");
+  }
+
+  return NextResponse.json({ behaviors });
 }
